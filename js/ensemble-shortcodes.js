@@ -5,19 +5,23 @@ jQuery(document).ready(function($) {
 		.append("<div id='ensemble-video-inner'>\
 		<div id='shortcode-type-header'>\
 		<ul>\
-			<li><a id='embed-video-link' class='active' data-shortcode-name='ensemblevideo'>Add Video</a></li>\
-			<li><a id='embed-showcase-link' data-shortcode-name='ensembleshowcase'>Add Showcase</a></li>\
-			<li><a id='embed-playlist-link' data-shortcode-name='ensembleplaylist'>Add Playlist</a></li>\
+			<li><a id='embed-video-link'>Add Video</a></li>\
+			<li><a id='embed-destination-link'>Add Web Destination</a></li>\
 		</ul>\
 		</div>\
 		<form>\
-		<p id='content-id'>\
+		<p id='content-id' class='for-video'>\
 		<label>Content ID <input id='content-id-input' /></label></p>\
-		<p id='destination-id' class='hidden'><label>Destination ID <input id='destination-id-input' /></label></p>\
-		<p><label>Autoplay <input type='checkbox' id='autoplay' /></label></p>\
+		<p id='destination-id' class='for-web-destination'>\
+		<label>Destination ID <input id='destination-id-input' /></label></p>\
+		<p class='for-video for-web-destination'><label>Autoplay <input type='checkbox' id='autoplay' /></label></p>\
+		<p class='for-video for-web-destination'><label>Show Captions <input type='checkbox' id='show-captions' /></label></p>\
+		<h3 class='for-web-destination'>Choose Layout</h3>\
+		<p class='for-web-destination'><label>Display Showcase <input type='checkbox' id='display-showcase' /></label></p>\
 		<input class='button-primary' type=submit value='Add video' /> \
 		<input type='button' class='button' onclick='tb_remove(); return false;' value='Cancel' />\
 		</form>\
+		<div id='ensemble-video-preview'></div>\
 		</div>")
 		.hide()
 		.appendTo('body');
@@ -33,33 +37,77 @@ jQuery(document).ready(function($) {
 		return false;		
 	});
 	
-	$('#embed-showcase-link, #embed-playlist-link').click(function(){
+/*
+	$('#ensemble-video-inner form').change(function(){
+	
+		var shortcode = generateEnsembleShortcode();
+		
+		var data = {
+			action: 'ensemblevideo_render_shortcode',
+			shortcode: generateEnsembleShortcode()
+		};
+		
+		$.post(ajaxurl, data, function(data){
+			$('#ensemble-video-preview').html(data);
+		});
+				
+	})
+*/
+	
+	$('#embed-destination-link').click(function(){
+	
 		$('#ensemble-video-inner a').removeClass('active');
 		$(this).addClass('active');
-		$('#content-id').hide();
-		$('#destination-id').show();
+		$('#ensemble-video-inner .for-video').hide();
+		$('#ensemble-video-inner .for-web-destination').show();
+		
 	});
 	
 	$('#embed-video-link').click(function(){
+	
 		$('#ensemble-video-inner a').removeClass('active');
 		$(this).addClass('active');
-		$('#destination-id').hide();
-		$('#content-id').show();
+		$('#ensemble-video-inner .for-web-destination').hide();
+		$('#ensemble-video-inner .for-video').show();
+		
 	});
 	
+	$('#embed-video-link').click();
+
+
 	function insertEnsembleShortcode() {
+				
+		var shortcode = generateEnsembleShortcode();
 		
-		var shortcode_name = $('#shortcode-type-header a.active').attr('data-shortcode-name');
+		tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);	
+	}
+	
+	function generateEnsembleShortcode() {
+		var shortcode = "[ensemblevideo ";
 		
-		var shortcode = "[" + shortcode_name + " contentid='" + 	$('#content-id-input').val() + "'";
+		if( $('#ensemble-video-inner a#embed-video-link').is('.active') ) {
+			shortcode += 'contentid=' + $('#content-id-input').val();
+		} else {
+			shortcode += 'destinationid=' + $('#destination-id-input').val();
+			
+			if( $('#display-showcase').is(':checked') ){
+				shortcode += ' displayshowcase=true';
+			}
+			
+		}
 		
 		if( $('#autoplay').is(':checked') ){
-			shortcode += " autoplay='true'";
+			shortcode += ' autoplay=true';
 		}
+		
+		if( $('#show-captions').is(':checked') ){
+			shortcode += ' showcaptions=true';
+		}
+		
 		
 		shortcode += ']';
 		
-		tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);	
+		return shortcode;
 	}
 	
 });
