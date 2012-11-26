@@ -16,12 +16,14 @@ jQuery(document).ready(function($) {
 		<label>Destination ID <input id='destination-id-input' /></label></p>\
 		<p class='for-video for-web-destination'><label>Autoplay <input type='checkbox' id='autoplay' /></label></p>\
 		<p class='for-video for-web-destination'><label>Show Captions <input type='checkbox' id='show-captions' /></label></p>\
+		<p class='for-video'><label>Audio <input type='checkbox' id='audio' /></label></p>\
 		<h3 class='for-web-destination'>Choose Layout</h3>\
 		<p class='for-web-destination'><label>Display Showcase <input type='checkbox' id='display-showcase' /></label></p>\
 		<input class='button-primary' type=submit value='Add video' /> \
 		<input type='button' class='button' onclick='tb_remove(); return false;' value='Cancel' />\
 		</form>\
 		<div id='ensemble-video-preview'></div>\
+		<div id='ensemble-video-library-videos'></div>\
 		</div>")
 		.hide()
 		.appendTo('body');
@@ -53,6 +55,36 @@ jQuery(document).ready(function($) {
 				
 	})
 */
+
+	function ajax_test(){
+		
+		var data = {
+			action: 'ensemblevideo_proxy_api',
+			api_call: 'Content',
+			username: 'apiDemo',
+			password: 'demo123'
+			
+		};
+		
+		$.post(ajaxurl, data, function(response){
+			console.log(response);
+			
+			$.each(response.Data, function(i, video){
+				$("<div class='ensemble-video-item' />")
+					.attr('data-content-id', video.ID)
+					.append("<h2>" + video.Title + "</h2>" )
+					.append("<img src='" + video.ThumbnailUrl + "' />")
+					.appendTo('#ensemble-video-library-videos');
+			})
+			
+		}, 'json');
+	}
+	ajax_test();
+	
+	$('.ensemble-video-item').live('click', function(){
+		var content_id = $(this).attr('data-content-id');
+		$('#content-id-input').val( content_id );
+	});
 	
 	$('#embed-destination-link').click(function(){
 	
@@ -86,8 +118,15 @@ jQuery(document).ready(function($) {
 		var shortcode = "[ensemblevideo ";
 		
 		if( $('#ensemble-video-inner a#embed-video-link').is('.active') ) {
+			
 			shortcode += 'contentid=' + $('#content-id-input').val();
+			
+			if( $('#audio').is(':checked') ){
+				shortcode += ' audio=true';
+			}
+			
 		} else {
+			
 			shortcode += 'destinationid=' + $('#destination-id-input').val();
 			
 			if( $('#display-showcase').is(':checked') ){

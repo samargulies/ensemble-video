@@ -12,7 +12,7 @@ class Ensemble_Video {
 	function Ensemble_Video() {		
 
 		// add our shortcode
-		add_shortcode('ensemblevideo', 			array(&$this, 'ensemblevideo_shortcode'));
+		add_shortcode('ensemblevideo', array(&$this, 'ensemblevideo_shortcode'));
 		
 		// set default options
 		if ( get_site_option('ensemble_video') === false ) {
@@ -31,17 +31,20 @@ class Ensemble_Video {
 			
 			
 			// add admin page
-			add_action('admin_menu', 			array(&$this, 'admin_menu'));
-            add_action('admin_init', 			array(&$this, 'admin_init'));
+			add_action('admin_menu', array(&$this, 'admin_menu'));
+            add_action('admin_init', array(&$this, 'admin_init'));
 			
 			// add network admin page
-			add_action('network_admin_menu', 	array(&$this, 'admin_menu'));
+			add_action('network_admin_menu', array(&$this, 'admin_menu'));
 			// save settings for network admin
 			add_action('network_admin_edit_ensemble_video', array( &$this, 'save_network_settings' ) );
 			// return message for update settings
 			add_action('network_admin_notices',	array( &$this, 'network_admin_notices' ) );
 			// add ajax function render shortcodes
-			add_action('wp_ajax_ensemblevideo_render_shortcode', 'ensemblevideo_render_shortcode_callback');
+			add_action('wp_ajax_ensemblevideo_render_shortcode', array( &$this, 'render_shortcode_callback') );
+			
+			add_action('wp_ajax_ensemblevideo_proxy_api', array( &$this, 'proxy_api_callback') );
+			
 
 		}
 	}
@@ -49,8 +52,8 @@ class Ensemble_Video {
 	function admin_enqueue_scripts() {
 		// TODO: restrict to pages with post editor
 		
-		wp_enqueue_script( 'ensemble-video', plugins_url('/js/ensemble-shortcodes.js', __FILE__) );
-		wp_enqueue_style( 'ensemble-video-styles', plugins_url('/css/ensemble-shortcodes.css', __FILE__) );
+		wp_enqueue_script( 'ensemble-video', plugins_url('/js/ensemble-video.js', __FILE__) );
+		wp_enqueue_style( 'ensemble-video-styles', plugins_url('/css/ensemble-video.css', __FILE__) );
 	}
 	
     function add_media_button($context) {
@@ -223,6 +226,8 @@ class Ensemble_Video {
 			
 			'contentid' 						=> '',
 			
+			'audio'								=> false,
+			
 			'width' 							=> $embed_defaults["width"],
 			'height' 							=> $embed_defaults["height"],
 			'iframe' 							=> 'true',
@@ -250,20 +255,24 @@ class Ensemble_Video {
 		if( $atts['width'] == $embed_defaults['width'] && $atts['height'] == $embed_defaults['height'] ) {
 				
 			// expand videos to be the biggest they can and still have the right proportions
+			// but only for single videos, leave web destinations at maximum embed size
 			if( !empty($atts['contentid']) ) {
 
 				list( $width, $height ) = wp_expand_dimensions( 480, 300, $atts['width'], $atts['height'] );
-				
-			} else {
-				$width = $atts['width'];
-				$height = $atts['height'];
 			}
 			
+		}  else {
+			$width = $atts['width'];
+			$height = $atts['height'];
+		}
+		
+		if( $atts['audio'] == true ) {
+			$height = '40';
 		}
 		
 		$output =  '<p><div id="ensembleEmbeddedContent';
 		$output .= !empty($atts['contentid']) ? $atts['contentid'] : $atts['destinationid'];
-		$output .= '" class="ensembleEmbeddedContent" style="width: ' . $width . 'px; height: ' . $height . 'px;"><script type="text/javascript" src="' . $atts['url'] . '/ensemble/app/plugin/plugin.aspx?';
+		$output .= '" class="ensembleEmbeddedContent" style="width: ' . $width . 'px; height: ' . ($height - 10) . 'px;margin-left:-8px;margin-top:-8px;"><script type="text/javascript" src="' . $atts['url'] . '/ensemble/app/plugin/plugin.aspx?';
 		if( !empty($atts['contentid']) ) {
 			$output .= 'contentID=' . $atts['contentid'];
 			$output .= '&displayTitle=' . $atts['title'];
@@ -271,7 +280,9 @@ class Ensemble_Video {
 			$output .= '&hideControls=' . $atts['hidecontrols'];
 			$output .= '&showCaptions=' . $atts['showcaptions'];
 			$output .= '&width=' . $width;
-			$output .= '&height=' . ($height - 30);
+			if( $atts['audio'] == false ) {
+				$output .= '&height=' . ($height - 30);
+			}
 			$output .= '&embed=true';
 			$output .= '&startTime=0';
 		} else {
@@ -298,13 +309,38 @@ class Ensemble_Video {
 		return $output;
 	}
 	
-	function ensemblevideo_render_shortcode_callback() {
-		
+	function render_shortcode_callback() {
+		// TODO: get working, add nonce
 		$data = array();
 				
 		$data['shortcode'] = do_shortcode( $_POST['shortcode'] );
 		
-		return json_encode($data);
+		echo json_encode($data);
+		
+		die(); // this is required to return a proper result
+	}
+
+	function proxy_api_callback() {
+		// TODO: get working, add nonce
+		
+		$options = $this->get_options();
+		
+		//$api_base = $options['ensemble_url'] . '/api/';
+		
+		$api_base = 'http://cloud-test.ensemblevideo.com/api/';
+		
+		$api_call = esc_attr( $_POST['api_call'] );
+		
+		$request_args = array(
+			'headers' => array(
+				'Authorization' => 'Basic ' . base64_encode( $_POST['username'] . ':' . $_POST['password'] )
+		) );
+		
+		$response = wp_remote_retrieve_body( wp_remote_request($api_base . $api_call, $request_args) );
+		
+		echo $response;
+		
+		die(); // this is required to return a proper result
 	}
 	
 }

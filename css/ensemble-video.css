@@ -56,3 +56,13 @@
 #ensemble-video-inner form {
 	padding: 10px;
 }
+
+
+#ensemble-video-library-videos {
+}
+
+.ensemble-video-item {
+	width: 30%;
+	float: left;
+	margin-right: 3%;
+}
