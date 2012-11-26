@@ -40,12 +40,6 @@ class Ensemble_Video {
 			add_action('network_admin_edit_ensemble_video', array( &$this, 'save_network_settings' ) );
 			// return message for update settings
 			add_action('network_admin_notices',	array( &$this, 'network_admin_notices' ) );
-			// add ajax function render shortcodes
-			add_action('wp_ajax_ensemblevideo_render_shortcode', array( &$this, 'render_shortcode_callback') );
-			
-			add_action('wp_ajax_ensemblevideo_proxy_api', array( &$this, 'proxy_api_callback') );
-			
-
 		}
 	}
 	
@@ -307,40 +301,6 @@ class Ensemble_Video {
 		$output .= '"></script></div></p>';
 		
 		return $output;
-	}
-	
-	function render_shortcode_callback() {
-		// TODO: get working, add nonce
-		$data = array();
-				
-		$data['shortcode'] = do_shortcode( $_POST['shortcode'] );
-		
-		echo json_encode($data);
-		
-		die(); // this is required to return a proper result
-	}
-
-	function proxy_api_callback() {
-		// TODO: get working, add nonce
-		
-		$options = $this->get_options();
-		
-		//$api_base = $options['ensemble_url'] . '/api/';
-		
-		$api_base = 'http://cloud-test.ensemblevideo.com/api/';
-		
-		$api_call = esc_attr( $_POST['api_call'] );
-		
-		$request_args = array(
-			'headers' => array(
-				'Authorization' => 'Basic ' . base64_encode( $_POST['username'] . ':' . $_POST['password'] )
-		) );
-		
-		$response = wp_remote_retrieve_body( wp_remote_request($api_base . $api_call, $request_args) );
-		
-		echo $response;
-		
-		die(); // this is required to return a proper result
 	}
 	
 }
