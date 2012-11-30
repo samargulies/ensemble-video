@@ -62,7 +62,7 @@ jQuery(document).ready(function($) {
 				
 		var shortcode = generateEnsembleShortcode();
 		
-		tinyMCE.activeEditor.execCommand('mceInsertContent', false, shortcode);	
+		window.send_to_editor( shortcode );	
 	}
 	
 	function generateEnsembleShortcode() {
