@@ -86,9 +86,11 @@ class Ensemble_Video {
 	}
 	
 	function default_options() {
-		return array(
+		$defaults = array(
 			'ensemble_url' => 'https://cloud.ensemblevideo.com',
 		);
+		
+		return apply_filters( $defaults);
 	}
 	
 	function validate_options($input) {
@@ -266,7 +268,13 @@ class Ensemble_Video {
 		
 		$output =  '<p><div id="ensembleEmbeddedContent';
 		$output .= !empty($atts['contentid']) ? $atts['contentid'] : $atts['destinationid'];
-		$output .= '" class="ensembleEmbeddedContent" style="width: ' . $width . 'px; height: ' . ($height - 10) . 'px;margin-left:-8px;margin-top:-8px;"><script type="text/javascript" src="' . $atts['url'] . '/ensemble/app/plugin/plugin.aspx?';
+		$output .= '" class="ensembleEmbeddedContent" style="width: ' . $width . 'px; height: ' . ($height - 10) . 'px;';
+		
+		if( !empty($atts['contentid']) ) {
+			$output .= 'margin-left:-8px;margin-top:-8px;';
+		}
+		
+		$output .= '"><script type="text/javascript" src="' . $atts['url'] . '/ensemble/app/plugin/plugin.aspx?';
 		if( !empty($atts['contentid']) ) {
 			$output .= 'contentID=' . $atts['contentid'];
 			$output .= '&displayTitle=' . $atts['title'];
