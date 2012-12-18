@@ -5,9 +5,9 @@ jQuery(document).ready(function($) {
 		.append("<div id='ensemble-video-inner'>\
 		<div id='shortcode-type-header'>\
 		<ul>\
-			<li><a id='embed-video-link'>Add Video</a></li>\
-			<li><a id='embed-audio-link'>Add Audio</a></li>\
-			<li><a id='embed-destination-link'>Add Web Destination</a></li>\
+			<li><a id='embed-video-link' data-display-class='for-video'>Add Video</a></li>\
+			<li><a id='embed-audio-link' data-display-class='for-video'>Add Audio</a></li>\
+			<li><a id='embed-destination-link' data-display-class='for-web-destination'>Add Web Destination</a></li>\
 		</ul>\
 		</div>\
 		<form>\
@@ -38,30 +38,17 @@ jQuery(document).ready(function($) {
 		return false;		
 	});
 	
-	$('#embed-destination-link').click(function(){
-	
-		$('#ensemble-video-inner a').removeClass('active');
-		$(this).addClass('active');
-		$('#ensemble-video-inner .for-video').hide();
-		$('#ensemble-video-inner .for-web-destination').show();
+	$('#shortcode-type-header a').click(function(){
 		
-	});
-	
-	$('#embed-video-link').click(function(){
-	
 		$('#ensemble-video-inner a').removeClass('active');
 		$(this).addClass('active');
-		$('#ensemble-video-inner .for-web-destination').hide();
-		$('#ensemble-video-inner .for-video').show();
+			
+		// set insert button text based on tab text
+		$("#ensemble-video-inner .button-primary").val( $(this).text() );
 		
-	});
-	
-	$('#embed-audio-link').click(function(){
-	
-		$('#ensemble-video-inner a').removeClass('active');
-		$(this).addClass('active');
-		$('#ensemble-video-inner .for-web-destination').hide();
-		$('#ensemble-video-inner .for-video').show();
+		// toggle display of form elements
+		$('#ensemble-video-inner p, #ensemble-video-inner h3').hide();
+		$( '#ensemble-video-inner .' + $(this).attr('data-display-class') ).show();
 		
 	});
 	

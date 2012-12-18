@@ -53,8 +53,20 @@ class Ensemble_Video {
     function add_media_button($context) {
 
         $image_btn = plugins_url( '/img/ensemble-button-bw.png', __FILE__ );
-
-		$out = '<a href="#TB_inline?width=240&height=240&inlineId=ensemble-video" class="thickbox" id="add-ensemble-video" title="' . __("Add Ensemble Video", 'ensemble-video') . '"><img src="'.$image_btn.'" alt="' . __("Add Ensemble Video", 'ensemble-video') . '" /></a>';
+		$out = "<style>
+		.ensemble-video-media-icon{
+        background:url($image_btn) no-repeat top left;
+        display: inline-block;
+        height: 20px;
+        margin: -3px 0 0 0;
+        vertical-align: text-top;
+        width: 20px;
+        }
+        .wp-core-ui #add-ensemble-video{
+         padding-left: 0.4em;
+        }            
+		</style>";
+		$out .= '<a href="#TB_inline?width=240&height=240&inlineId=ensemble-video" class="thickbox button" id="add-ensemble-video" title="' . __("Add Ensemble Video", 'ensemble-video') . '"><span class="ensemble-video-media-icon"></span> Add Ensemble Video</a>';
 		return $context . $out;
 	
 	}
