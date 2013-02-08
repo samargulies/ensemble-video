@@ -7,7 +7,7 @@ jQuery(document).ready(function($) {
 		<ul>\
 			<li><a id='embed-video-link' data-display-class='for-video'>Add Video</a></li>\
 			<li><a id='embed-audio-link' data-display-class='for-video'>Add Audio</a></li>\
-			<li><a id='embed-destination-link' data-display-class='for-web-destination'>Add Web Destination</a></li>\
+			<li><a id='embed-destination-link' data-display-class='for-web-destination'>Add Playlist</a></li>\
 		</ul>\
 		</div>\
 		<form>\
