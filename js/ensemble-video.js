@@ -14,7 +14,7 @@ jQuery(document).ready(function($) {
 		<p id='content-id' class='for-video'>\
 		<label>Content ID <input id='content-id-input' /></label></p>\
 		<p id='destination-id' class='for-web-destination'>\
-		<label>Destination ID <input id='destination-id-input' /></label></p>\
+		<label>Playlist ID <input id='destination-id-input' /></label></p>\
 		<p class='for-video for-web-destination'>\
 		<label><input type='checkbox' id='autoplay' /> Autoplay</label> &nbsp;&nbsp;&nbsp;\
 		<label><input type='checkbox' id='show-captions' /> Show Captions</label></p>\
