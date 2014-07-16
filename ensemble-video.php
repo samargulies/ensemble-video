@@ -2,7 +2,7 @@
 /*
 Plugin Name: Ensemble Video
 Description: Easily embed ensemble videos in your site
-Version: 1.0
+Version: 1.1
 Author: Sam Margulies
 */
 
@@ -24,13 +24,13 @@ class Ensemble_Video {
 		}
 		
 		if( is_admin() ) {
+			
 			// add media button 
 			add_action('media_buttons_context', array(&$this, 'add_media_button'), 999);
 			// add media button scripts and styles
 			add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
 			
-			
-			// add admin page
+				// add admin page
 			add_action('admin_menu', array(&$this, 'admin_menu'));
             add_action('admin_init', array(&$this, 'admin_init'));
 			
@@ -44,10 +44,15 @@ class Ensemble_Video {
 	}
 	
 	function admin_enqueue_scripts() {
-		// TODO: restrict to pages with post editor
 		
-		wp_enqueue_script( 'ensemble-video', plugins_url('/js/ensemble-video.js', __FILE__) );
-		wp_enqueue_style( 'ensemble-video-styles', plugins_url('/css/ensemble-video.css', __FILE__) );
+		$screen = get_current_screen();
+		// restrict scripts to pages with post editor	
+		if( in_array( $screen->base, array('post', 'dashboard') ) ) {
+			
+			wp_enqueue_script( 'ensemble-video', plugins_url('/js/ensemble-video.js', __FILE__), array('media-views') );
+			wp_enqueue_style( 'ensemble-video-styles', plugins_url('/css/ensemble-video.css', __FILE__) );
+			
+		}
 	}
 	
     function add_media_button($context) {
@@ -232,19 +237,19 @@ class Ensemble_Video {
 
 			'url' 								=> $options['ensemble_url'],
 			
-			'contentid' 						=> '',
+			'contentid' 						=> false,
 			
 			'audio'								=> false,
 			
-			'width' 							=> $embed_defaults["width"],
-			'height' 							=> $embed_defaults["height"],
+			'width' 							=> $embed_defaults['width'],
+			'height' 							=> $embed_defaults['height'],
 			'iframe' 							=> 'true',
 			'title' 							=> 'false',
 			'autoplay' 							=> 'false',
 			'showcaptions' 						=> 'false',
 			'hidecontrols' 						=> 'false',
 			
-			'destinationid' 					=> '',
+			'destinationid' 					=> false,
 			
 			'displayshowcase' 					=> false,
 			'featuredcontentorderbydirection' 	=> 'desc',
@@ -260,55 +265,56 @@ class Ensemble_Video {
 		), $atts);
 		
 		
-		if( $atts['width'] == $embed_defaults['width'] && $atts['height'] == $embed_defaults['height'] ) {
-				
+		if( $atts['width'] == $embed_defaults['width'] && 
+		    $atts['height'] == $embed_defaults['height'] && 
+		    $atts['contentid'] !== false ) {
+			
 			// expand videos to be the biggest they can and still have the right proportions
 			// but only for single videos, leave web destinations at maximum embed size
-			if( !empty($atts['contentid']) ) {
 
-				list( $width, $height ) = wp_expand_dimensions( 480, 300, $atts['width'], $atts['height'] );
-			}
+			list( $width, $height ) = wp_expand_dimensions( 480, 300, $atts['width'], $atts['height'] );
 			
 		}  else {
 			$width = $atts['width'];
 			$height = $atts['height'];
-		}
+		}		
 		
 		if( $atts['audio'] == true ) {
-			$height = '40';
+			$height = 40;
 		}
-		
-		$output =  '<p><div id="ensembleEmbeddedContent';
+		$output =  '<p><iframe id="ensembleEmbeddedContent';
 		$output .= !empty($atts['contentid']) ? $atts['contentid'] : $atts['destinationid'];
-		$output .= '" class="ensembleEmbeddedContent" style="width: ' . $width . 'px; height: ' . ($height - 10) . 'px;';
+		$output .= '" class="ensembleEmbeddedContent" style="width: ' . $width . 'px; height: ' . $height . 'px;"';
+		$output .= ' src="' . $atts['url'] . '/app/plugin/embed.aspx?';
 		
-		if( !empty($atts['contentid']) ) {
-			$output .= 'margin-left:-8px;margin-top:-8px;';
-		}
-		
-		$output .= '"><script type="text/javascript" src="' . $atts['url'] . '/ensemble/app/plugin/plugin.aspx?';
-		if( !empty($atts['contentid']) ) {
-			$output .= 'contentID=' . $atts['contentid'];
+		if( $atts['contentid'] !== false ) {
+			
+			$output .= 'ID=' . $atts['contentid'];
 			$output .= '&displayTitle=' . $atts['title'];
-			$output .= '&autoPlay=' . $atts['autoplay'];
+			$output .= '&autoplay=' . $atts['autoplay'];
 			$output .= '&hideControls=' . $atts['hidecontrols'];
 			$output .= '&showCaptions=' . $atts['showcaptions'];
 			$output .= '&width=' . $width;
+			
 			if( $atts['audio'] == false ) {
 				$output .= '&height=' . ($height - 30);
 			}
-			$output .= '&embed=true';
+			
 			$output .= '&startTime=0';
+			
 		} else {
+			
 			$output .= 'DestinationID=' . $atts['destinationid'];
 			
-			$output .= '&maxContentWidth=' . $width;
+			//$output .= '&maxContentWidth=' . $width;
 			
 			if( $atts['displayshowcase'] !== false ) {
+				
 				$output .= '&displayShowcase=' . $atts['displayshowcase'];
 				$output .= '&featuredContentOrderByDirection=' . $atts['featuredcontentorderbydirection'];
 				$output .= '&displayCategoryList=' . $atts['displaycategorylist'];
 				$output .= '&categoryOrientation=' . $atts['categoryorientation'];
+				
 			}
 			
 			$output .= '&displayEmbedCode='	 . $atts['displayembedcode'];
@@ -316,9 +322,10 @@ class Ensemble_Video {
 			$output .= '&displayAttachments=' . $atts['displayattachments'];
 			$output .= '&displayLinks='		 . $atts['displaylinks'];
 			$output .= '&displayCredits='	 . $atts['displaycredits'];
+			
 		}
-		$output .= '&useIFrame=' . $atts['iframe'];
-		$output .= '"></script></div></p>';
+		//$output .= '&useIFrame=' . $atts['iframe'];
+		$output .= '"></iframe></p>';
 		
 		return $output;
 	}
