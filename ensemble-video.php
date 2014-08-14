@@ -49,7 +49,7 @@ class Ensemble_Video {
 		// restrict scripts to pages with post editor	
 		if( in_array( $screen->base, array('post', 'dashboard') ) ) {
 			
-			wp_enqueue_script( 'ensemble-video', plugins_url('/js/ensemble-video.js', __FILE__), array('media-views') );
+			wp_enqueue_script( 'ensemble-video', plugins_url('/js/ensemble-video.js', __FILE__) );
 			wp_enqueue_style( 'ensemble-video-styles', plugins_url('/css/ensemble-video.css', __FILE__) );
 			
 		}
